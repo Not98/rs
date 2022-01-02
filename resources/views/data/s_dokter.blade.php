@@ -314,7 +314,7 @@
                 // console.log(res.chekbok);
                 html=[] ;
                 html='<div class="form-group"><label>Nama Dokter</label>'+
-                   '<input type="text" class="form-control"dat="'+res.aktiv['code']+'" placeholder="'+res.aktiv['dokter']+'" disabled="">';
+                   '<input type="text" id="dok"class="form-control"dat="'+res.aktiv['code']+'" placeholder="'+res.aktiv['dokter']+'" disabled="">';
                 if (res.chekbok.length >=1) {
                     for (let i = 0; i < res.chekbok.length; i++) {
                     html += '<div class="col-sm-6">'+
@@ -343,19 +343,29 @@
                             '</div>';
                 }
                 html +='</div>';
+                var dok=res.aktiv['code'];
+                
             Swal.fire({
                     title: 'Dokter Spesialis',
                     html:html,
                     showCancelButton: true,
                     focusConfirm: false,
                     preConfirm: () => {
+                        var sps = [];  
+                        $('.sps').each(function(){  
+                            if($(this).is(":checked"))  
+                            {  
+                                sps.push($(this).val());  
+                            }  
+                            });  
+                            sps = sps.toString();
                         $.ajax({
                             type: "POST",
-                            url: "",
-                            data: "data",
-                            dataType: "dataType",
-                            success: function (response) {
-                                
+                            url: "{{route('up_doc_spesialis')}}",
+                            data: {id_sps:sps,code:dok},
+                            dataType: "JSON",
+                            success: function (res) {
+                                messg(res);
                             }
                         });
                     }

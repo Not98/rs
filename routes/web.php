@@ -41,11 +41,13 @@ Route::get('/menu',[Menu::class,'index'])->name('menu');
 Route::get('/admin',[Menu::class,'admin'])->name('utama_admin');
 Route::get('/penyakit',[Menu::class,'penyakit'])->name('setting_penyakit');
 Route::get('/setting-user',[Menu::class,'user_stting'])->name('setting-user');
+Route::get('/jadwal',[Menu::class,'jadwal'])->name('jadwal');
 
 Route::get('/setting',[Menu::class,'setting'])->name('setting-admin');
 Route::get('/setting-jadwal',[Menu::class,'jadwal_stting'])->name('setting-jadwal');
 Route::get('/spesialis',[Menu::class,'spesialis'])->name('spesialis');
 Route::get('/dokter',[Menu::class,'dokter'])->name('dokter');
+Route::get('/dokter-control',[Menu::class,'dokter_control'])->name('dokter-control');
 
 
 //daata table
@@ -90,6 +92,7 @@ Route::get('/get-dok-sps',[Ajax::class,'get_doc_sps'])->name('get-dok-sps');
 Route::get('/get-up-dok-sps',[Ajax::class,'get_doc_up_sps'])->name('get-up-dok-sps');
 Route::POST('/add-dok-sps',[Ajax::class,'add_doc_spesialis'])->name('add-dok-sps');
 Route::POST('/del-dok-sps',[Ajax::class,'del_doc_spesialis'])->name('del-dok-sps');
+Route::POST('/up_doc_spesialis',[Ajax::class,'up_doc_spesialis'])->name('up_doc_spesialis');
 
 // nomer rawat
 Route::get('/regist-rawat',[Rawat::class,'index'])->name('regist-rawat');
@@ -109,10 +112,18 @@ Route::get('/panggil-no-ulang-b',[Data::class,'no_antrian_b'])->name('panggil-no
 
 // priksa dokter
 Route::get('/pasien-p',[Ajax::class,'get_pasien'])->name('pasien-p');
+Route::get('/pasien-p-cn',[Ajax::class,'get_pasien_cn'])->name('pasien-p-cn');
 Route::get('/g-penyakit',[ajax::class,'get_pn'])->name('g-penyakit');
 Route::POST('/rawat-simpan',[ajax::class,'pr_simpan'])->name('rawat-simpan');
+Route::POST('/rawat-simpan-p-cn',[ajax::class,'simpan_p_cn'])->name('rawat-simpan-p-cn');
+
 Route::POST('/rawat-nex',[ajax::class,'nex'])->name('rawat-nex');
 
 
 Route::get('/rawat-jalan',[Rawat::class,'r_jalan'])->name('rawat-jalan');
-Route::get('/detail-ra',[Ajax::class,'detail_control'])->name('detail-ra');
+Route::get('/rawat-umum',[Rawat::class,'r_um'])->name('rawat-umum');
+Route::get('/detail-ra',[data::class,'detail_control'])->name('detail-ra');
+Route::get('/detail-umu',[data::class,'berobat'])->name('detail-umu');
+Route::get('/detail-umum',[data::class,'detail_berobat'])->name('detail-umum');
+
+Route::get('/get-jadwal',[data::class,'jadwal'])->name('get-jadwal');

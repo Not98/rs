@@ -689,6 +689,7 @@ class Ajax extends Controller
             if (!$cek) {
                 if ($input['code']&&$input['id_sps']) {
                     $a=['id_spesialis'=>$input['id_sps'],'code_dokter'=>$input['code']];
+
                     $in=DB::table('dokter_spesialis')->insert($a);
                     if ($in) {
                         $msg =['msg'=>'Berhasil Di Simpan','sts'=>'success'];
@@ -717,6 +718,7 @@ class Ajax extends Controller
             if ($gt_sps) {
                     $x=explode(",",$gt_sps->id_spesialis);
             }
+         
             foreach ($sps as $key => $value) {
                 if (in_array($value->id,$x)) {
                     $xx="checked";
@@ -746,6 +748,30 @@ class Ajax extends Controller
         }
         return $msg;
     }
+    public function up_doc_spesialis(Request $request)
+    {
+        if ($request->ajax()) {
+            $input=$request->input();
+            $a=[];
+            $msg=[];
+            $cek= DB::table('dokter_spesialis')->where('code_dokter',$input['code'])->first();
+            if ($cek) {
+                if ($input['code']&&$input['id_sps']) {
+                    $a=['id_spesialis'=>$input['id_sps'],'code_dokter'=>$input['code']];
+                    $in=DB::table('dokter_spesialis')->where('code_dokter',$input['code'])->update($a);
+                    if ($in) {
+                        $msg =['msg'=>'Berhasil Di Update','sts'=>'success'];
+                    }else {
+                        $msg =['msg'=>'Data gagal Di Update','sts'=>'error'];
+                    }
+                }
+            }
+            
+        }
+        return $msg;
+    }
+
+
 // daftar rawat
     public function no_control(Request $request)
     {
@@ -789,7 +815,7 @@ class Ajax extends Controller
             if ($input['tipe']==1) {
                 // $x=explode('CN-',$input['id']);
                 // $no=1+(int)$x;
-                $ins=DB::table('antri')->insert(['no_antrian'=>$input['id'],'nik_p'=>session('user'),'tipe_id'=>1,'tanggal'=>date('Y-m-d'),'status'=>0]);
+                $ins=DB::table('antri')->insert(['no_antrian'=>$input['id'],'nik_p'=>session('user'),'tipe_id'=>1,'tanggal'=>date('Y-m-d'),'status'=>0,'status_p'=>'']);
 
                  if ($ins) {
                     $msg =['msg'=>'Nomer Antrian Telah Di Anbil Silahkn Tunggu','sts'=>'success'];
@@ -797,7 +823,7 @@ class Ajax extends Controller
             }elseif ($input['tipe']==2) {
                 // $x=explode('CN-',$input['id']);
                 // $no=1+(int)$x;
-                $ins=DB::table('antri')->insert(['no_antrian'=>$input['id'],'nik_p'=>session('user'),'tipe_id'=>4,'tanggal'=>date('Y-m-d'),'status'=>0]);
+                $ins=DB::table('antri')->insert(['no_antrian'=>$input['id'],'nik_p'=>session('user'),'tipe_id'=>4,'tanggal'=>date('Y-m-d'),'status'=>0,'status_p'=>'']);
                  if ($ins) {
                     $msg =['msg'=>'Nomer Antrian Telah Di Anbil Silahkn Tunggu','sts'=>'success'];
                  }
@@ -874,7 +900,7 @@ class Ajax extends Controller
         }
     }
 
-
+// dokter
     public function get_pasien(Request $request)
     {
         if ($request->ajax()) {
@@ -887,6 +913,57 @@ class Ajax extends Controller
         // dd($get);
         return $data;
     }
+    public function get_pasien_cn(Request $request)
+    {
+        if ($request->ajax()) {
+            $input=$request->input();
+            $get= DB::table('antri')->join('user','antri.nik_p','=','user.user')->join('pasien','antri.nik_p','=','pasien.nik')->where('antri.status',1)->where('antri.tipe_id',1)->whereDate('antri.tanggal',date('Y-m-d'))->where('status_p',"")->orderBy('antri.id','asc')->get();
+        
+            if (!empty($get)) {
+               $data=['antri'=>$get[0]->no_antrian,'nama'=>$get[0]->nama,'cod_p'=>$get[0]->no_antrian.date('md')];
+            }
+            else {
+                $data=[];
+            }
+        }
+        // dd($get);
+        return $data;
+    }
+    public function simpan_p_cn(Request $request)
+    {
+        if ($request->ajax()) {
+            $input=$request->input();
+            if ($input) {
+              
+                $wher = DB::table('pasien_brobat')->where('code_rawat',$input['code'])->where('tipe',3)->first();
+                if ($wher) {
+                    $msg=[];
+                    $data=['code_rw_jl'=>$input['code'],
+                    'control'=>1,
+                    'status'=>1,
+                    'ket'=>$input['ket'],
+                    'tanggal_c'=>date('Y-m-d')];
+                    $in= DB::table('control')->insert($data);
+                    if ($in) {
+                              $up= DB::table('antri')->where('no_antrian',$input['antri'])->update(['status_p'=>'ok']);
+                        $msg =['msg'=>'Data Pasien Berhasil Di Simpan','sts'=>'success'];
+                    }else {
+                        $msg =['msg'=>'Data Pasien Gagal Di Simpan','sts'=>'error'];
+                        
+                    }
+                }else {
+                    $msg =['msg'=>'Maaf code salah','sts'=>'error'];
+                    
+                }
+                
+            }
+            return $msg;
+            
+        }
+        return response()->json(['error'=>$valid->errors()->all(),'sts'=>'error']);
+
+    }
+
     public function get_pn(Request $request)
     {
         if ($request->ajax()) {
@@ -920,7 +997,7 @@ class Ajax extends Controller
             if (!$wher) {
                 $in=DB::table('pasien_brobat')->insert($data);
                 if ($in) {
-                    $up= DB::table('antri')->where('no_antrian',$input['antri'])->update('status_p','ok');
+                    $up= DB::table('antri')->where('no_antrian',$input['antri'])->update(['status_p'=>'ok']);
                     $msg =['msg'=>'Data Pasien Berhasil Di Simpan','sts'=>'success'];
                 }else {
                     $msg =['msg'=>'Data Pasien Gagal Di Simpan','sts'=>'error'];
@@ -930,10 +1007,14 @@ class Ajax extends Controller
                 $msg =['msg'=>'Code Periksa sudah ada','sts'=>'error'];
             }
             }
+            return $msg;
         }
-        return $msg;
+        return response()->json(['error'=>$valid->errors()->all(),'sts'=>'error']);
     }
-
+    public function control_p(Type $var = null)
+    {
+        
+    }
     public function nex(Request $request)
     {
         if ($request->ajax()) {
@@ -943,8 +1024,10 @@ class Ajax extends Controller
             if ($up) {
                 $msg =['msg'=>'Next Pasien OK','sts'=>'success'];
             }
+            return $msg;
         }
-        return $msg;
+        return response()->json(['error'=>$valid->errors()->all(),'sts'=>'error']);
+
     }
 
 
@@ -956,6 +1039,7 @@ class Ajax extends Controller
         return $gb;
       }
     }
+
 
     public function cek()
     {

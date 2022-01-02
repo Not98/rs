@@ -128,7 +128,7 @@
               $.ajax({
                 type: "POST",
                 url: "{{route('del-user')}}",
-                data: {id:i},
+                data: {id:x},
                 dataType: "JSON",
                 success: function (response) {
                   Swal.fire(

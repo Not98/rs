@@ -19,14 +19,24 @@
 
     <!-- Custom styles for this template-->
 
-    <link href="{{asset('/thems/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet">
+    <link href="{{asset('/thems/vendor/datatables/jquery.dataTables.min.css')}}" rel="stylesheet">
+    {{-- <link href="{{asset('/thems/vendor/datatables/dataTables.bootstrap4.min.css')}}" rel="stylesheet"> --}}
     <link href="{{asset('/thems/vendor/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css')}}" rel="stylesheet">
     <link href="{{asset('/thems/vendor/jquery/jquery-ui.js')}}" rel="stylesheet">
     <link href="{{asset('/thems/vendor/date/css/bootstrap-datetimepicker.css')}}" rel="stylesheet">
     <link href="{{asset('/thems/vendor/daterangepicker/daterangepicker.css')}}" rel="stylesheet">
-  
+   
     <link href="{{asset('/thems/css/sb-admin-2.min.css')}}" rel="stylesheet">
-
+   <style>
+   
+    td.details-control {
+        background: url("{{asset('thems/vendor/images/details_open.png')}}") no-repeat center center;
+        cursor: pointer;
+    }
+    tr.details td.details-control {
+        background: url("{{asset('/thems/vendor/images/details_close.png')}}") no-repeat center center;
+    }
+    </style>
 </head>
 
 <body id="page-top">
@@ -65,11 +75,53 @@
              <div class="sidebar-heading">
                  Menu
              </div>
-             @if (session('id_level') == 4)
+             @if(session('id_level')==1)
+                      <!-- Nav Item - Pages Collapse Menu -->
+                      <li class="nav-item">
+                        <a class="nav-link" href="dokter">
+                            <i class="fas fa-user-md"></i>
+                         
+                            <span>Penanganan</span></a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="dokter-control">
+                            <i class="fas fa-briefcase-medical"></i>
+                         
+                            <span>Controll</span></a>
+                      </li>
+
+             <li class="nav-item">
+                <a class="nav-link" href="panggil-no">
+                    <i class="far fa-address-book"></i>
+                    <span>Antrian</span></a>
+            </li>
+             
+                <li class="nav-item">
+                    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
+                        aria-expanded="true" aria-controls="collapseTwo">
+                        <i class="fas fa-hospital-user"></i>
+                        <span>Settings</span>
+                    </a>
+                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                        <div class="bg-white py-2 collapse-inner rounded">
+                            <h6 class="collapse-header">Pengaturan Simpus:</h6>
+                            <a class="collapse-item" href="setting-jadwal">Jadwal</a>
+                            <a class="collapse-item" href="penyakit">Penyakit</a>
+                            <a class="collapse-item" href="spesialis">Spesialis</a>
+                            <a class="collapse-item" href="setting-user">User</a>
+                        </div>
+                    </div>
+                </li>
+             @elseif (session('id_level') == 4)
              <li class="nav-item">
                 <a class="nav-link" href="regist-rawat">
                  <i class="fas fa-stethoscope"></i>
              <span>Daftar</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="jadwal">
+                    <i class="fas fa-book-medical"></i>
+             <span>Jadwal Dokter</span></a>
             </li>
              <li class="nav-item">
                  <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
@@ -81,11 +133,10 @@
                      <div class="bg-white py-2 collapse-inner rounded">
                          <h6 class="collapse-header">Pendaftaran Pasien:</h6>
                          <a class="collapse-item" href="rawat-jalan">Rawat Jalan</a>
-                         <a class="collapse-item" href="setting-user">Rawat Inap</a>
+                         <a class="collapse-item" href="rawat-umum">Berobat umum</a>
                      </div>
                  </div>
              </li>
- 
              
              @elseif (session('id_level')==3)
              <li class="nav-item">
@@ -102,6 +153,13 @@
                          
                             <span>Penanganan</span></a>
                       </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="dokter-control">
+                            <i class="fas fa-briefcase-medical"></i>
+                         
+                            <span>Controll</span></a>
+                      </li>
+                     
              @endif
             @else
             <li class="nav-item">
@@ -147,25 +205,14 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{session('user')}}</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{session('nama')}}</span>
                                 <img class="img-profile rounded-circle"
                                     src="/thems/user.png">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Profile
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Settings
-                                </a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Activity Log
-                                </a>
+                            
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="log_out" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>

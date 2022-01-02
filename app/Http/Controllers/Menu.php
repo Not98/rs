@@ -60,6 +60,17 @@ class Menu extends Controller
     {
         return view('dokter.pasien');
     }
-  
+    public function dokter_control()
+    {
+        return view('dokter.pasien_control');
+    }
+
+    public function jadwal()
+    {
+        
+        
+        return view('user.jadwal');
+    }
+
 
 }

@@ -27,4 +27,8 @@ class Rawat extends Controller
     {
         return view('user.histori_rj');
     }
+    public function r_um()
+    {
+        return view('user.histori_um');
+    }
 }

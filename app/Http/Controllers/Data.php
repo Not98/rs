@@ -139,7 +139,7 @@ class Data extends Controller
     public function d_spesialis(Request $request)
     {
         if ($request->ajax()) {
-            $db = DB::table('dokter_spesialis')->join('dokter','dokter_spesialis.code_dokter','=','dokter.code')->get();
+            $db = DB::table('dokter_spesialis')->select('dokter.nama as nama','dokter_spesialis.id as id')->join('dokter','dokter_spesialis.code_dokter','=','dokter.code')->get();
             return Datatables::of($db)
                     ->addIndexColumn()
                     ->addColumn('action', function($row){
@@ -198,17 +198,13 @@ class Data extends Controller
     public function data_rawat_j(Request $request)
     {
         if ($request->ajax()) {
-// SELECT * FROM `user` join pasien ON user.user = pasien.nik join antri ON user.user = antri.nik_p JOIN pasien_brobat ON antri.no_antrian=pasien_brobat.no_antrian WHERE user =111 AND tipe =3 AND status_p='ok';
+         // SELECT * FROM `user` join pasien ON user.user = pasien.nik join antri ON user.user = antri.nik_p JOIN pasien_brobat ON antri.no_antrian=pasien_brobat.no_antrian WHERE user =111 AND tipe =3 AND status_p='ok';
         $db = DB::table('user')->join('pasien','user.user','=','pasien.nik')->join('antri','user.user','=','antri.nik_p')
             ->join('pasien_brobat','antri.no_antrian','=','pasien_brobat.no_antrian')->join('tipe','antri.tipe_id','=','tipe.id')
             ->join('dokter','pasien_brobat.code_dokter','=','dokter.code')
-            ->where('tanggal',date('Y-m-d'))->where('tipe_id',4)->where('pasien_brobat.tipe',3)->where('status_p',"ok")->where('user.user',session('user'))->get();  
+            ->where('tipe_id',4)->where('pasien_brobat.tipe',3)->where('status_p',"ok")->where('user.user',session('user'))->get();  
             return Datatables::of($db)
             ->addIndexColumn()
-                    ->addColumn('action', function($row){
-                            $btn = '<a href="javascript:void(0)" data-toggle="tooltip"  data-id="'.$row->code_rawat.'" data-original-title="View" class="view btn btn-primary btn-sm viewx"><i class="fas fa-eye"></i></a>';
-                            return $btn;
-                    })
                     ->rawColumns(['action'])->setRowData([
                                     'code_rawat' => function($user) {
                                         return 'row-' . $user->code_rawat;
@@ -223,6 +219,110 @@ class Data extends Controller
                     ->make(true);
         }
     }
+
+    public function detail_control(Request $request)
+    {
+      if ($request->ajax()) {
+        $input = $request->input();
+        // SELECT * FROM `user` join pasien ON user.user = pasien.nik join antri ON user.user = antri.nik_p JOIN pasien_brobat ON antri.no_antrian=pasien_brobat.no_antrian JOIN control on pasien_brobat.code_rawat = control.code_rw_jl WHERE user =111 AND tipe =3 AND status_p='ok';
+        $db = DB::table('user')->join('pasien','user.user','=','pasien.nik')
+              ->join('antri','user.user','=','antri.nik_p')
+              ->join('pasien_brobat','antri.no_antrian','=','pasien_brobat.no_antrian')
+              ->join('control','pasien_brobat.code_rawat','=','control.code_rw_jl')
+              ->where('user.user',session('user'))
+              ->where('tipe',3)
+              ->where('status_p','ok')
+              ->where('code_rw_jl',$input['code'])
+              ->distinct()->get();
+              foreach ($db as $key => $value) {
+                $x=explode (",",$value->id_penyakit);
+                foreach ($x as $key => $vx) {
+                   $pn[]=DB::table('penyakit')->where('id',$vx)->pluck('penyakit')->first();
+                }
+                  $data[]=['jumlah'=>$db->count(),'anggal'=>$value->tanggal_c,'keterangan'=>$value->keterangan,'penyakit'=>$pn];
+              }
+        return $data;
+      }
+    }
+
+    public function berobat(Request $request)
+    {
+       if ($request->ajax()) {
+         $db= DB::table('pasien_brobat')->join('user','user.user','=','pasien_brobat.nik_us')
+                ->join('dokter','pasien_brobat.code_dokter','=','dokter.code')
+                ->join('tipe','pasien_brobat.tipe','=','tipe.id')
+                ->where('tipe','<>',3)
+                ->where('user.user',session('user'))
+                ->get();
+                return Datatables::of($db)
+                ->addIndexColumn()
+                        ->rawColumns(['action'])->setRowData([
+                                        'code_rawat' => function($user) {
+                                            return 'row-' . $user->code_rawat;
+                                        },
+                                        'nama' => function($user) {
+                                            return 'row-' . $user->nama;
+                                        },
+                                        'tanggal_brobat' => function($user) {
+                                            return 'row-' . $user->tanggal_brobat;
+                                        },
+                                        ])
+                        ->make(true);
+       }
+    }
+    public function detail_berobat(Request $request)
+    {
+
+        if ($request->ajax()) {
+            $input = $request->input();
+            $db= DB::table('pasien_brobat')->join('user','user.user','=','pasien_brobat.nik_us')
+                        ->join('dokter','pasien_brobat.code_dokter','=','dokter.code')
+                        ->join('tipe','pasien_brobat.tipe','=','tipe.id')
+                        ->where('tipe','<>',3)
+                        ->where('user.user',session('user'))
+                        ->where('code_rawat',$input['code'])
+                        ->get();
+            foreach ($db as $key => $value) {
+                $x=explode (",",$value->id_penyakit);
+                foreach ($x as $key => $vx) {
+                   $pn[]=DB::table('penyakit')->where('id',$vx)->pluck('penyakit')->first();
+                }
+                  $data[]=['tipe'=>$value->tipe_p,'tanggal'=>$value->tanggal_brobat,'keterangan'=>$value->keterangan,'penyakit'=>$pn];
+              }
+            }
+            return $data;
+       
+    }
+
+    public function jadwal(Request $request)
+    {
+       if ($request->ajax()) {
+        $data=[];
+        $db = DB::table('jadwal')->get();
+        foreach ($db as $key => $value) {
+            $x=explode (",",$value->id_hari);
+           foreach ($x as $key => $vx) {
+                $hr[]= DB::table('hari')->where('id',$vx)->pluck('hari')->first();
+                $sps= DB::table('dokter')->join('dokter_spesialis','dokter.code','=','dokter_spesialis.code_dokter')->where('code',$value->code_doc)->pluck('nama')->first();
+                if (!$sps) {
+                    $sps=DB::table('dokter')->where('code',$value->code_doc)->pluck('nama')->first();
+                }
+                // ->join('spesialis','dokter_spesialis.id_spesialis','=','spesialis')
+                $sp=DB::table('dokter')->join('dokter_spesialis','dokter.code','=','dokter_spesialis.code_dokter')->join('spesialis','dokter_spesialis.id_spesialis','=','spesialis.id')->where('code',$value->code_doc)->pluck('spesialis.spesialis')->first();
+                if ($sp) {
+                    $s=$sp;
+                }else {
+                    $s="";
+                }
+            }
+            $data[]=['dok'=>$value->code_doc,'nama'=>$sps,'spesialis'=>$sp,'hari'=>$hr];
+        }
+       }
+        return $data;
+    }
+
+
+
 
 
 }
